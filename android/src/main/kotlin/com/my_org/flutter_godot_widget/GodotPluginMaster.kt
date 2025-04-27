@@ -19,29 +19,30 @@ import org.godotengine.godot.plugin.UsedByGodot
 
 
 public class godotpluginMaster(godot: Godot?) :  GodotPlugin(godot), EventChannel.StreamHandler{
-    class GodotPluginMaster:PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+class GodotPluginMaster(private val compatibilityMode: Boolean = false) : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
 
-        override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
-            val creationParams = args as Map<String?, Any?>?
-            println("Context in GodotPluginMaster: $context")
-            val activityContext = unwrapActivity(context)
-            println("Unwrapped activity: $activityContext")
+    override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
+        val creationParams = args as Map<String?, Any?>?
+        println("Context in GodotPluginMaster: $context")
+        val activityContext = unwrapActivity(context)
+        println("Unwrapped activity: $activityContext")
 
-            return GodotStarter(activityContext, viewId, creationParams) //! FACTORY
-        }
-
-        private fun unwrapActivity(context: Context): FragmentActivity {
-            var unwrappedContext = context
-            while (unwrappedContext is ContextWrapper) {
-                println("Unwrapping context: ${unwrappedContext.javaClass.name}, Base Context: ${unwrappedContext.baseContext?.javaClass?.name}")
-                if (unwrappedContext is FragmentActivity) {
-                    return unwrappedContext
-                }
-                unwrappedContext = unwrappedContext.baseContext
-            }
-            throw IllegalStateException("Context is not a FragmentActivity : ${context.javaClass.name}")
-        }
+        // Pass the compatibility mode to GodotStarter
+        return GodotStarter(activityContext, viewId, creationParams, compatibilityMode)
     }
+
+    private fun unwrapActivity(context: Context): FragmentActivity {
+        var unwrappedContext = context
+        while (unwrappedContext is ContextWrapper) {
+            println("Unwrapping context: ${unwrappedContext.javaClass.name}, Base Context: ${unwrappedContext.baseContext?.javaClass?.name}")
+            if (unwrappedContext is FragmentActivity) {
+                return unwrappedContext
+            }
+            unwrappedContext = unwrappedContext.baseContext
+        }
+        throw IllegalStateException("Context is not a FragmentActivity : ${context.javaClass.name}")
+    }
+}
     private var faf: String = ""
 
 

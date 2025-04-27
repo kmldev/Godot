@@ -22,6 +22,23 @@ class FlutterGodotWidgetPlugin: FlutterPlugin, MethodCallHandler {
     private var eventSink: EventChannel.EventSink? = null
     private val networkEventChannel = "kaiyo.ezgodot/generic"
 
+private fun setupPlatformViewsForOlderVersions(binding: FlutterPluginBinding) {
+    // Check if we're on an older Android version
+    val sdkVersion = android.os.Build.VERSION.SDK_INT
+    if (sdkVersion >= 23 && sdkVersion <= 28) {
+        Log.d("FlutterGodotWidgetPlugin", "Setting up platform views for older Android (SDK $sdkVersion)")
+        
+        // Specific configuration for older versions
+        binding.platformViewRegistry.registerViewFactory(
+            "platform-view-type",
+            godotpluginMaster.GodotPluginMaster(true) // Pass flag for compatibility mode
+        )
+    } else {
+        // Normal configuration for recent versions
+    // Use the configuration function based on Android version
+    setupPlatformViewsForOlderVersions(binding)
+    }
+}
     override fun onAttachedToEngine(binding: FlutterPluginBinding) {
         Log.d("CustomGodotPlayer", "onAttachedToEngine")
         println("in fluttergodotwidgetplugin")
